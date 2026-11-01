@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>비교봇 챌린지 🤖 AI와 대화하며 배우는 비교급</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF9F2; --cream:#FFF3E2; --mint:#9DE3C1; --mint-dark:#2FAE7B;
+  --peach:#FFB7A1; --coral:#FF8A70; --sky:#A8D8F0; --lav:#C9B8F5;
+  --ink:#4A3F3A; --sub:#9B8C84; --card:#FFFFFF; --line:#F3E4D3;
+  --green:#34C77B; --red:#FF6B6B; --yellow:#FFD166;
+  --shadow:0 6px 24px rgba(120,80,40,.10);
+}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:'Gowun Dodum','Jua',sans-serif; background:var(--bg); color:var(--ink);
+  background-image:radial-gradient(circle at 15% 20%, #FFEEDB 0, transparent 30%),
+                   radial-gradient(circle at 85% 10%, #E4F7EC 0, transparent 30%),
+                   radial-gradient(circle at 70% 90%, #FDEBEF 0, transparent 35%);
+}
+h1,h2,h3,.jua,button{font-family:'Jua',sans-serif;}
+button{cursor:pointer; border:none; background:none; color:inherit;}
+input{font-family:inherit;}
+.hidden{display:none !important;}
+
+/* ---------- 홈 화면 ---------- */
+#viewHome{min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px 48px;}
+.home-card{width:100%; max-width:520px; text-align:center;}
+.mascot{font-size:72px; animation:bob 2.4s ease-in-out infinite; display:inline-block;}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+.home-title{font-size:clamp(34px,8vw,52px); line-height:1.15; margin:10px 0 6px;
+  background:linear-gradient(120deg,#FF8A70,#F5A623 35%,#2FAE7B 70%,#5B8DEF);
+  -webkit-background-clip:text; background-clip:text; color:transparent;}
+.home-sub{font-size:16px; color:var(--sub); margin-bottom:26px;}
+.home-sub b{color:var(--mint-dark);}
+.panel{background:var(--card); border-radius:24px; box-shadow:var(--shadow); padding:22px 20px; margin-bottom:16px; border:2px solid var(--line);}
+.panel h3{font-size:17px; margin-bottom:12px; color:var(--ink);}
+.class-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:8px;}
+.class-btn{padding:12px 0; border-radius:14px; background:var(--cream); font-family:'Jua'; font-size:17px; color:var(--ink); border:2px solid transparent; transition:.15s;}
+.class-btn.sel{background:var(--mint); border-color:var(--mint-dark); color:#14543A; transform:scale(1.06);}
+.name-input{width:100%; padding:14px 16px; border-radius:14px; border:2px solid var(--line); font-size:17px; text-align:center; background:var(--cream); outline:none;}
+.name-input:focus{border-color:var(--mint);}
+.go-btn{width:100%; max-width:520px; padding:17px; border-radius:18px; font-size:21px; color:#fff;
+  background:linear-gradient(120deg,var(--coral),#F5A623); box-shadow:0 8px 20px rgba(255,138,112,.35); transition:.15s;}
+.go-btn:active{transform:scale(.97);}
+.go-btn:disabled{opacity:.45; box-shadow:none;}
+.teacher-link{margin-top:22px; color:var(--sub); font-size:14px; text-decoration:underline;}
+.home-badges{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:22px;}
+.badge{font-size:12.5px; background:#fff; border:1.5px solid var(--line); padding:6px 12px; border-radius:999px; color:var(--sub);}
+
+/* ---------- 학생 채팅 화면 ---------- */
+#viewStudent{height:100dvh; display:flex; flex-direction:column; max-width:640px; margin:0 auto;}
+.chat-top{display:flex; align-items:center; gap:10px; padding:12px 16px; background:rgba(255,255,255,.85); backdrop-filter:blur(8px); border-bottom:2px solid var(--line); position:sticky; top:0; z-index:5;}
+.chat-top .avatar{font-size:30px;}
+.chat-top .who{flex:1;}
+.chat-top .who .nm{font-family:'Jua'; font-size:17px;}
+.chat-top .who .st{font-size:12px; color:var(--mint-dark);}
+.progress-pill{font-family:'Jua'; font-size:14px; background:var(--cream); padding:7px 13px; border-radius:999px; color:var(--ink); border:1.5px solid var(--line);}
+.score-pill{font-family:'Jua'; font-size:14px; background:#E9FBF1; padding:7px 13px; border-radius:999px; color:var(--mint-dark); border:1.5px solid #BFEBD4;}
+#chatScroll{flex:1; overflow-y:auto; padding:18px 14px 10px; display:flex; flex-direction:column; gap:12px;}
+.msg{display:flex; gap:8px; max-width:92%; animation:pop .25s ease;}
+@keyframes pop{from{opacity:0; transform:translateY(8px) scale(.97)}to{opacity:1}}
+.msg.bot{align-self:flex-start;}
+.msg.me{align-self:flex-end; flex-direction:row-reverse;}
+.msg .face{font-size:26px; line-height:1; margin-top:2px;}
+.bubble{padding:12px 15px; border-radius:18px; font-size:15.5px; line-height:1.55; white-space:pre-wrap; word-break:keep-all;}
+.msg.bot .bubble{background:#fff; border:2px solid var(--line); border-top-left-radius:6px; box-shadow:0 3px 10px rgba(120,80,40,.06);}
+.msg.me .bubble{background:var(--mint); color:#14543A; border-top-right-radius:6px;}
+.bubble .big-word{font-family:'Jua'; font-size:22px; color:var(--coral);}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;}
+.opt-btn{padding:12px 10px; border-radius:14px; background:var(--cream); border:2px solid var(--line); font-size:16px; font-family:'Jua'; color:var(--ink); transition:.15s;}
+.opt-btn:not(:disabled):hover{border-color:var(--peach); transform:translateY(-2px);}
+.opt-btn.ok{background:#D9F7E5; border-color:var(--green); color:#116B41;}
+.opt-btn.no{background:#FFE3E3; border-color:var(--red); color:#B23A3A;}
+.opt-btn:disabled{cursor:default;}
+.hint-row{margin-top:10px;}
+.hint-btn{font-size:13.5px; font-family:'Jua'; color:#8A6D00; background:#FFF4D1; border:1.5px solid #F2D98B; padding:7px 13px; border-radius:999px;}
+.chat-input-row{display:flex; gap:8px; padding:10px 12px calc(12px + env(safe-area-inset-bottom)); background:rgba(255,255,255,.9); border-top:2px solid var(--line);}
+.chat-input{flex:1; padding:12px 15px; border-radius:999px; border:2px solid var(--line); font-size:15px; outline:none; background:var(--cream);}
+.chat-input:focus{border-color:var(--sky);}
+.send-btn{width:46px; height:46px; border-radius:50%; background:var(--mint-dark); color:#fff; font-size:19px; flex:0 0 auto;}
+.typing{display:inline-flex; gap:4px; padding:4px 2px;}
+.typing i{width:7px; height:7px; border-radius:50%; background:#CBB9A8; animation:blink 1s infinite;}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+.final-card{background:linear-gradient(135deg,#FFF3E2,#E9FBF1); border:2px solid var(--line); border-radius:20px; padding:18px; text-align:center; margin-top:8px;}
+.final-card .trophy{font-size:46px;}
+.final-card .sc{font-family:'Jua'; font-size:30px; color:var(--mint-dark);}
+
+/* ---------- 교사 대시보드 ---------- */
+#viewTeacher{min-height:100dvh; padding:18px clamp(12px,3vw,32px) 60px; max-width:1480px; margin:0 auto;}
+.t-head{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px;}
+.t-title{font-size:clamp(22px,3.4vw,32px);}
+.t-title .bot{color:var(--mint-dark);}
+.t-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-left:auto;}
+.sel-class{font-family:'Jua'; font-size:16px; padding:10px 14px; border-radius:12px; border:2px solid var(--line); background:#fff;}
+.t-btn{font-family:'Jua'; font-size:15px; padding:11px 18px; border-radius:13px; color:#fff; transition:.15s;}
+.t-btn:active{transform:scale(.96);}
+.t-btn.start{background:var(--mint-dark); box-shadow:0 5px 14px rgba(47,174,123,.3);}
+.t-btn.stop{background:var(--coral); box-shadow:0 5px 14px rgba(255,138,112,.3);}
+.t-btn.review{background:#5B8DEF; box-shadow:0 5px 14px rgba(91,141,239,.3);}
+.t-btn.ghost{background:#fff; color:var(--sub); border:2px solid var(--line); box-shadow:none;}
+.session-state{font-size:14px; font-family:'Jua'; padding:8px 14px; border-radius:999px;}
+.session-state.on{background:#DFF8EA; color:#117A4C;}
+.session-state.off{background:#F5EDE4; color:var(--sub);}
+.session-state.end{background:#FFE9E3; color:#C2543C;}
+.stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;}
+.stat-card{background:#fff; border:2px solid var(--line); border-radius:18px; padding:14px 16px; box-shadow:var(--shadow);}
+.stat-card .lb{font-size:13px; color:var(--sub);}
+.stat-card .vl{font-family:'Jua'; font-size:30px; margin-top:2px;}
+.stat-card .vl small{font-size:15px; color:var(--sub);}
+.dash-grid{display:grid; grid-template-columns:1.25fr .9fr; gap:16px; align-items:start;}
+@media(max-width:980px){.dash-grid{grid-template-columns:1fr;}}
+.d-panel{background:#fff; border:2px solid var(--line); border-radius:20px; box-shadow:var(--shadow); padding:16px 18px; margin-bottom:16px;}
+.d-panel h2{font-size:18px; margin-bottom:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.d-panel h2 .cnt{font-size:13px; color:var(--sub); font-family:'Gowun Dodum';}
+.stu-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:10px;
+  max-height:46vh; overflow-y:auto; padding-right:4px;}
+.stu-grid::-webkit-scrollbar{width:8px;} .stu-grid::-webkit-scrollbar-thumb{background:#E3D6C7; border-radius:99px;}
+.stu-card{border:2px solid var(--line); border-radius:14px; padding:10px 12px; background:var(--cream); position:relative;}
+.stu-card.done{background:#E9FBF1; border-color:#BFEBD4;}
+.stu-card .nm{font-family:'Jua'; font-size:15.5px; display:flex; align-items:center; gap:7px;}
+.dot{width:10px; height:10px; border-radius:50%; background:#D8CCC0; flex:0 0 auto;}
+.dot.on{background:var(--green); box-shadow:0 0 0 0 rgba(52,199,123,.5); animation:pulse 1.6s infinite;}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(52,199,123,0)}100%{box-shadow:0 0 0 0 rgba(52,199,123,0)}}
+.stu-card .meta{font-size:12.5px; color:var(--sub); margin-top:4px; line-height:1.5;}
+.mini-bar{height:7px; background:#EFE3D5; border-radius:99px; overflow:hidden; margin-top:6px;}
+.mini-bar i{display:block; height:100%; background:linear-gradient(90deg,var(--mint),var(--mint-dark)); border-radius:99px; transition:width .4s;}
+.stu-card .flag{position:absolute; top:8px; right:10px; font-size:14px;}
+.rank-item{display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1.5px dashed var(--line); font-size:14.5px;}
+.rank-item:last-child{border-bottom:none;}
+.rank-no{font-family:'Jua'; width:26px; height:26px; border-radius:50%; background:var(--cream); display:flex; align-items:center; justify-content:center; font-size:13px; flex:0 0 auto;}
+.rank-item.hot .rank-no{background:#FFE3E3; color:#C04040;}
+.rank-word{font-family:'Jua'; width:150px; flex:0 0 auto;}
+.rank-bar{flex:1; height:12px; background:#F6EADC; border-radius:99px; overflow:hidden;}
+.rank-bar i{display:block; height:100%; background:linear-gradient(90deg,#FFB7A1,#FF6B6B); border-radius:99px; transition:width .4s;}
+.rank-pct{font-family:'Jua'; width:88px; text-align:right; font-size:13px; color:#C04040; flex:0 0 auto;}
+.ai-panel{background:linear-gradient(135deg,#F3F0FF,#EAF6FF); border-color:#DCD2F5;}
+.ai-panel h2 .live{font-size:11px; color:#fff; background:var(--coral); border-radius:99px; padding:3px 9px; animation:blink 1.4s infinite;}
+.ai-msg{background:#fff; border-radius:14px; border:1.5px solid #E4DCF7; padding:11px 13px; font-size:14px; line-height:1.6; margin-bottom:9px; word-break:keep-all;}
+.ai-msg b{color:#6A4FC9;}
+.cat-row{display:flex; align-items:center; gap:9px; margin-bottom:8px; font-size:13.5px;}
+.cat-name{width:215px; flex:0 0 auto; line-height:1.3;}
+.cat-bar{flex:1; height:13px; background:#EDE7FB; border-radius:99px; overflow:hidden;}
+.cat-bar i{display:block; height:100%; border-radius:99px; transition:width .4s;}
+.cat-pct{width:74px; text-align:right; font-family:'Jua'; font-size:13px; flex:0 0 auto;}
+.chat-feed{max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;}
+.q-item{background:var(--cream); border-radius:12px; padding:9px 12px; font-size:14px;}
+.q-item .qn{font-family:'Jua'; color:var(--mint-dark); font-size:13px;}
+.empty{color:var(--sub); font-size:14px; text-align:center; padding:18px 0;}
+.toggle-row{display:flex; align-items:center; gap:8px; font-size:14px; font-family:'Jua'; color:var(--sub);}
+.tgl{width:52px; height:28px; border-radius:99px; background:#E3D6C7; position:relative; transition:.2s; flex:0 0 auto;}
+.tgl::after{content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tgl.on{background:var(--mint-dark);}
+.tgl.on::after{left:27px;}
+.summary-panel{border:3px solid #FFD9A8; background:linear-gradient(135deg,#FFF9EE,#FFF2F0);}
+.sum-hero{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;}
+@media(max-width:620px){.sum-hero{grid-template-columns:1fr;}}
+.sum-box{background:#fff; border-radius:16px; padding:14px; text-align:center; border:2px solid var(--line);}
+.sum-box .t{font-size:13px; color:var(--sub);}
+.sum-box .w{font-family:'Jua'; font-size:26px; margin:4px 0;}
+.sum-box.best .w{color:var(--mint-dark);} .sum-box.worst .w{color:var(--red);}
+.wrong-detail{border-top:2px dashed var(--line); padding-top:12px; margin-top:4px;}
+.wd-q{margin-bottom:12px;}
+.wd-q .head{font-family:'Jua'; font-size:15px; margin-bottom:5px;}
+.wd-ans{display:inline-flex; align-items:center; gap:6px; background:#FFECEC; border:1.5px solid #FFC9C9; color:#B23A3A; border-radius:99px; padding:4px 12px; font-size:13.5px; margin:0 6px 6px 0;}
+.wd-ans .names{color:#8a6a6a; font-size:12px;}
+
+/* ---------- 복습 모드 (큰 화면) ---------- */
+#reviewOverlay{position:fixed; inset:0; background:linear-gradient(135deg,#2E2A3F,#1F3A33); z-index:50; display:flex; flex-direction:column; color:#fff; padding:clamp(14px,3vw,36px);}
+.rv-top{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+.rv-top h2{font-size:clamp(20px,2.6vw,30px); color:#FFE9A8;}
+.rv-top .close{margin-left:auto; font-family:'Jua'; font-size:16px; background:rgba(255,255,255,.14); color:#fff; padding:10px 18px; border-radius:12px;}
+.rv-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:clamp(10px,2vh,22px);}
+.rv-rank{font-family:'Jua'; font-size:clamp(15px,1.8vw,20px); color:#FFB7A1;}
+.rv-word{font-family:'Jua'; font-size:clamp(54px,10vw,120px); color:#FFE9A8; line-height:1.1;}
+.rv-q{font-size:clamp(17px,2.4vw,26px); color:#D9E8E0;}
+.rv-opts{display:grid; grid-template-columns:repeat(2,minmax(240px,380px)); gap:14px; width:min(860px,94%);}
+@media(max-width:640px){.rv-opts{grid-template-columns:1fr;}}
+.rv-opt{background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.18); border-radius:18px; padding:14px 18px; text-align:left; position:relative; overflow:hidden;}
+.rv-opt .fill{position:absolute; inset:0; width:0; background:rgba(255,183,161,.22); transition:width .7s;}
+.rv-opt.ans .fill{background:rgba(52,199,123,.3);}
+.rv-opt .lb{position:relative; font-family:'Jua'; font-size:clamp(18px,2.6vw,28px); display:flex; justify-content:space-between; align-items:center; gap:10px;}
+.rv-opt .n{font-size:clamp(13px,1.6vw,17px); color:#FFD9C7;}
+.rv-opt.ans .lb{color:#9DF3C4;}
+.rv-opt.ans .n{color:#9DF3C4;}
+.rv-hint{background:rgba(255,233,168,.12); border:1.5px dashed rgba(255,233,168,.5); color:#FFE9A8; border-radius:16px; padding:12px 20px; font-size:clamp(15px,2vw,21px); max-width:860px; word-break:keep-all;}
+.rv-nav{display:flex; gap:12px; justify-content:center; align-items:center; padding-top:6px; flex-wrap:wrap;}
+.rv-nav button{font-family:'Jua'; font-size:clamp(15px,1.8vw,19px); padding:13px 26px; border-radius:14px; background:rgba(255,255,255,.14); color:#fff;}
+.rv-nav button.main{background:var(--mint-dark);}
+.rv-nav button:disabled{opacity:.35;}
+
+/* 모달 */
+#pinModal{position:fixed; inset:0; background:rgba(60,40,30,.45); z-index:60; display:flex; align-items:center; justify-content:center; padding:20px;}
+.pin-card{background:#fff; border-radius:22px; padding:26px 24px; width:100%; max-width:340px; text-align:center;}
+.pin-card h3{font-size:19px; margin-bottom:14px;}
+.toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%); background:#4A3F3A; color:#fff; padding:11px 20px; border-radius:99px; font-size:14px; z-index:99; opacity:0; transition:.25s; pointer-events:none; max-width:90%;}
+.toast.show{opacity:1;}
+.wait-card{text-align:center; padding:30px 10px;}
+.wait-card .big{font-size:52px; animation:bob 2s infinite; display:inline-block;}
+</style>
+</head>
+<body>
+
+<!-- ================= 홈 ================= -->
+<div id="viewHome">
+  <div class="home-card">
+    <span class="mascot">🤖</span>
+    <h1 class="home-title">비교봇 챌린지!</h1>
+    <p class="home-sub"><b>AI 비교봇</b>과 수다 떨면서 비교급 정복하기 💬✨<br>힌트가 필요하면 비교봇에게 물어봐!</p>
+    <div class="home-badges">
+      <span class="badge">🤖 AI 힌트 챗봇</span>
+      <span class="badge">📊 실시간 선생님 대시보드</span>
+    </div>
+    <div class="panel">
+      <h3>🏫 우리 반을 골라줘!</h3>
+      <div class="class-grid" id="classGrid"></div>
+    </div>
+    <div class="panel">
+      <h3>✏️ 이름을 알려줘!</h3>
+      <input class="name-input" id="nameInput" maxlength="12" placeholder="예) 홍길동" autocomplete="off">
+    </div>
+    <button class="go-btn" id="joinBtn" disabled>🚀 비교봇 만나러 가기!</button>
+    <br>
+    <button class="teacher-link" id="teacherLink">👩‍🏫 선생님이신가요? (교사용 대시보드)</button>
+  </div>
+</div>
+
+<!-- ================= 학생 채팅 ================= -->
+<div id="viewStudent" class="hidden">
+  <div class="chat-top">
+    <span class="avatar">🤖</span>
+    <div class="who">
+      <div class="nm">비교봇</div>
+      <div class="st" id="connLine">● 온라인 — 비교급 전문 AI</div>
+    </div>
+    <span class="score-pill" id="scorePill">⭐ 0</span>
+    <span class="progress-pill" id="progressPill">0 / 0</span>
+  </div>
+  <div id="chatScroll"></div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="freeInput" maxlength="120" placeholder="답을 직접 써도 되고, 질문해도 돼! (예: 단모음이 뭐야?)">
+    <button class="send-btn" id="freeSend">➤</button>
+  </div>
+</div>
+
+<!-- ================= 교사 대시보드 ================= -->
+<div id="viewTeacher" class="hidden">
+  <div class="t-head">
+    <h1 class="t-title">👩‍🏫 <span class="bot">비교봇</span> 교사 대시보드</h1>
+    <span class="session-state off" id="sessionState">세션 없음</span>
+    <div class="t-controls">
+      <select class="sel-class" id="teacherClassSel"></select>
+      <button class="t-btn stop" id="endBtn">🏁 게임 종료 · 결과 보기</button>
+      <button class="t-btn review" id="reviewBtn">📺 다같이 복습 (큰 화면)</button>
+      <div class="toggle-row"><span id="nameTglLabel">이름 보이기</span><button class="tgl on" id="nameTgl" title="화면 공유 시 이름 숨기기"></button></div>
+      <button class="t-btn ghost" id="homeBtn">🏠 처음으로</button>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="lb">🟢 접속 학생</div><div class="vl" id="statOnline">0<small> 명</small></div></div>
+    <div class="stat-card"><div class="lb">✍️ 풀이 진행 중</div><div class="vl" id="statActive">0<small> 명</small></div></div>
+    <div class="stat-card"><div class="lb">🏁 완료</div><div class="vl" id="statDone">0<small> 명</small></div></div>
+    <div class="stat-card"><div class="lb">🎯 평균 정답률</div><div class="vl" id="statAcc">-<small> %</small></div></div>
+    <div class="stat-card"><div class="lb">💡 힌트 사용</div><div class="vl" id="statHint">0<small> 회</small></div></div>
+  </div>
+
+  <div id="summaryPanel" class="d-panel summary-panel hidden">
+    <h2>🏁 게임 종료 결과 요약</h2>
+    <div class="sum-hero">
+      <div class="sum-box best"><div class="t">😎 가장 많이 맞힌 문제</div><div class="w" id="sumBest">-</div><div class="t" id="sumBestSub"></div></div>
+      <div class="sum-box worst"><div class="t">😵 가장 많이 틀린 문제</div><div class="w" id="sumWorst">-</div><div class="t" id="sumWorstSub"></div></div>
+    </div>
+    <div class="wrong-detail" id="wrongDetail"></div>
+  </div>
+
+  <div class="dash-grid">
+    <div>
+      <div class="d-panel">
+        <h2>🧑‍🎓 학생 현황 <span class="cnt">이름을 고르고 들어오면 초록불이 켜져요</span></h2>
+        <div class="stu-grid" id="stuGrid"><div class="empty">아직 입장한 학생이 없어요</div></div>
+      </div>
+      <div class="d-panel">
+        <h2>🔥 오답률 랭킹 <span class="cnt">많이 틀린 문제 순서 · 실시간</span></h2>
+        <div id="rankList"><div class="empty">답안이 모이면 순위가 나타나요</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="d-panel ai-panel">
+        <h2>🤖 AI 실시간 학습 분석 <span class="live">LIVE</span></h2>
+        <div id="aiMsgs"><div class="ai-msg">학생들의 답이 모이면 비교봇이 오류 유형과 개념 이해도를 분석해 드려요 🔍</div></div>
+        <h2 style="margin-top:16px; font-size:15.5px;">📚 비교급 규칙별 이해도</h2>
+        <div id="catBars"></div>
+      </div>
+      <div class="d-panel">
+        <h2>💬 학생 질문 피드 <span class="cnt">비교봇에게 보낸 질문</span></h2>
+        <div class="chat-feed" id="chatFeed"><div class="empty">아직 질문이 없어요</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 복습 모드 ================= -->
+<div id="reviewOverlay" class="hidden">
+  <div class="rv-top">
+    <h2>📺 다같이 복습해요!</h2>
+    <button class="close" id="rvClose">✕ 닫기</button>
+  </div>
+  <div class="rv-body">
+    <div class="rv-rank" id="rvRank"></div>
+    <div class="rv-word" id="rvWord"></div>
+    <div class="rv-q" id="rvQ"></div>
+    <div class="rv-opts" id="rvOpts"></div>
+    <div class="rv-hint hidden" id="rvHint"></div>
+    <div class="rv-nav">
+      <button id="rvPrev">◀ 이전</button>
+      <button class="main" id="rvReveal">✨ 정답 공개</button>
+      <button id="rvNext">다음 ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN 모달 -->
+<div id="pinModal" class="hidden">
+  <div class="pin-card">
+    <h3>🔐 교사용 비밀번호</h3>
+    <input class="name-input" id="pinInput" type="password" inputmode="numeric" placeholder="비밀번호 입력">
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button class="go-btn" style="font-size:16px; padding:12px;" id="pinOk">확인</button>
+      <button class="go-btn" style="font-size:16px; padding:12px; background:#CBB9A8; box-shadow:none;" id="pinCancel">취소</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* =========================================================
+   ⚙️ 설정 — 필요하면 여기만 바꾸세요
+========================================================= */
+const TEACHER_PIN = "1234";        // 교사용 비밀번호
+const NUM_CLASSES = 12;            // 반 개수
+const ONLINE_WINDOW = 50_000;      // 이 시간(ms) 안에 신호가 오면 '접속 중(초록불)'
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBvaNSzZfDRed8Hx_gIDovnSzu3587qk2c",
+  authDomain: "jy-comparingclass.firebaseapp.com",
+  projectId: "jy-comparingclass",
+  storageBucket: "jy-comparingclass.firebasestorage.app",
+  messagingSenderId: "159958141975",
+  appId: "1:159958141975:web:dce8acf26cf5c116fe2052",
+  measurementId: "G-86B9Z1YDDL"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection,
+  onSnapshot, query, where, arrayUnion, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* =========================================================
+   📚 문제 데이터 (쉬운 것 → 어려운 것 순서)
+   cat: 규칙 분류 / tags: 각 보기를 골랐을 때의 오류 유형
+========================================================= */
+const CATS = {
+  basic:{label:"① 기본: -er 붙이기", ex:"old → older", color:"#2FAE7B"},
+  e:   {label:"② -e로 끝나는 단어: -r만", ex:"nice → nicer", color:"#5B8DEF"},
+  cvc: {label:"③ 단모음+단자음: 끝 자음 겹치기", ex:"big → bigger", color:"#F5A623"},
+  y:   {label:"④ 「자음+y」: y → i + er", ex:"happy → happier", color:"#C97BD4"},
+  long:{label:"⑤ 긴 단어: more + 원급", ex:"beautiful → more beautiful", color:"#FF8A70"},
+  irr: {label:"⑥ 불규칙 변화", ex:"good → better", color:"#E05B7F"},
+};
+const ERRS = {
+  sup:       "비교급 ↔ 최상급(-est) 혼동",
+  more_short:"짧은 단어에 more 사용 (more big ❌)",
+  spell:     "-er 철자 실수",
+  spell_e:   "-e로 끝나는데 -er 중복 (niceer ❌)",
+  no_double: "끝 자음을 안 겹침 (biger ❌)",
+  y_keep:    "y를 i로 안 바꿈 (happyer ❌)",
+  er_long:   "긴 단어에 -er 사용 (beautifuler ❌)",
+  reg_irr:   "불규칙 단어에 규칙 적용 (gooder ❌)",
+};
+const QUESTIONS = [
+  {w:"old",  q:"'old'(나이 든)의 비교급은?", cat:"basic",
+   opts:["older","oldest","more old","olders"], ans:0, tags:[null,"sup","more_short","spell"],
+   hint:"old처럼 짧은 단어(1음절)는 뒤에 -er만 붙이면 끝! old + er 😉"},
+  {w:"tall", q:"'tall'(키가 큰)의 비교급은?", cat:"basic",
+   opts:["taller","tallest","more tall","taler"], ans:0, tags:[null,"sup","more_short","spell"],
+   hint:"tall도 짧은 단어! 그대로 -er만 붙여봐. -est는 '최상급(가장 ~한)'이야!"},
+  {w:"fast", q:"'fast'(빠른)의 비교급은?", cat:"basic",
+   opts:["faster","more fast","fastest","fastter"], ans:0, tags:[null,"more_short","sup","spell"],
+   hint:"짧은 단어는 -er! more는 beautiful처럼 긴 단어에만 써 🏃"},
+  {w:"nice", q:"'nice'(멋진)의 비교급은?", cat:"e",
+   opts:["nicer","niceer","more nice","nicest"], ans:0, tags:[null,"spell_e","more_short","sup"],
+   hint:"nice는 이미 e로 끝나지? e가 이미 있으니까 -r만 살짝 붙이면 돼!"},
+  {w:"large", q:"'large'(큰, 넓은)의 비교급은?", cat:"e",
+   opts:["larger","largeer","largest","more large"], ans:0, tags:[null,"spell_e","sup","more_short"],
+   hint:"large도 e로 끝나는 단어! e + er = ee가 되면 이상하니까 -r만 붙여 😎"},
+  {w:"big", q:"'big'(큰)의 비교급은?", cat:"cvc",
+   opts:["bigger","biger","more big","bigest"], ans:0, tags:[null,"no_double","more_short","sup"],
+   hint:"big은 [단모음 + 단자음]으로 끝나! 이럴 땐 마지막 자음(g)을 한 번 더 쓰고 -er! b-i-g-g-e-r ✌️"},
+  {w:"hot", q:"'hot'(뜨거운)의 비교급은?", cat:"cvc",
+   opts:["hotter","hoter","hottest","more hot"], ans:0, tags:[null,"no_double","sup","more_short"],
+   hint:"hot도 단모음(o) + 단자음(t)! 마지막 t를 겹쳐서 hott- + er 🔥"},
+  {w:"thin", q:"'thin'(얇은, 마른)의 비교급은?", cat:"cvc",
+   opts:["thinner","thiner","more thin","thinnest"], ans:0, tags:[null,"no_double","more_short","sup"],
+   hint:"thin의 끝을 봐! 모음 i 하나 + 자음 n 하나 = 자음을 겹쳐 쓰는 단어야!"},
+  {w:"happy", q:"'happy'(행복한)의 비교급은?", cat:"y",
+   opts:["happier","happyer","more happy","happiest"], ans:0, tags:[null,"y_keep","more_short","sup"],
+   hint:"happy는 「자음 + y」로 끝나! y를 i로 바꾸고 -er을 붙여봐. happ-i-er 😊"},
+  {w:"easy", q:"'easy'(쉬운)의 비교급은?", cat:"y",
+   opts:["easier","easyer","easiest","more easy"], ans:0, tags:[null,"y_keep","sup","more_short"],
+   hint:"easy도 y로 끝나지? y는 수줍어서 i로 변신하고 -er! 🎭"},
+  {w:"pretty", q:"'pretty'(예쁜)의 비교급은?", cat:"y",
+   opts:["prettier","prettyer","more pretty","prettiest"], ans:0, tags:[null,"y_keep","more_short","sup"],
+   hint:"「자음 + y」 규칙 기억나? y → i로 바꾸고 -er을 붙이는 거야!"},
+  {w:"beautiful", q:"'beautiful'(아름다운)의 비교급은?", cat:"long",
+   opts:["more beautiful","beautifuler","most beautiful","beautifuller"], ans:0, tags:[null,"er_long","sup","er_long"],
+   hint:"beautiful은 3음절이나 되는 긴 단어! 긴 단어는 -er 대신 앞에 more를 붙여 💅"},
+  {w:"interesting", q:"'interesting'(재미있는)의 비교급은?", cat:"long",
+   opts:["more interesting","interestinger","most interesting","interestier"], ans:0, tags:[null,"er_long","sup","er_long"],
+   hint:"interesting처럼 긴 단어에 -er을 붙이면 발음이 꼬여버려! more + interesting 🤓"},
+  {w:"good", q:"'good'(좋은)의 비교급은?", cat:"irr",
+   opts:["better","gooder","more good","best"], ans:0, tags:[null,"reg_irr","reg_irr","sup"],
+   hint:"good은 규칙을 안 따르는 반항아! 아예 다른 단어로 변신해. good → be□□er 💪"},
+  {w:"bad", q:"'bad'(나쁜)의 비교급은?", cat:"irr",
+   opts:["worse","badder","worst","more bad"], ans:0, tags:[null,"reg_irr","sup","reg_irr"],
+   hint:"bad도 불규칙 변화! good → better처럼 완전히 다른 단어가 돼. w로 시작해 😈"},
+];
+const NQ = QUESTIONS.length;
+
+/* =========================================================
+   🧠 비교봇 지식 엔진
+   어떤 영어 형용사를 물어봐도 규칙을 스스로 분석해서 답합니다.
+========================================================= */
+const IRREG = {
+  good:"better", well:"better", bad:"worse", badly:"worse", ill:"worse",
+  many:"more", much:"more", little:"less", far:"farther / further",
+  old:"older (가족이면 elder도 가능)",
+};
+const VOWELS = "aeiou";
+const MEAN = {  // 자주 나오는 단어 뜻 (있으면 같이 알려줌)
+  old:"나이 든", tall:"키가 큰", fast:"빠른", short:"짧은", long:"긴", young:"어린",
+  small:"작은", strong:"힘센", cheap:"싼", kind:"친절한", new:"새로운", cold:"추운",
+  warm:"따뜻한", hard:"어려운/단단한", high:"높은", low:"낮은", rich:"부유한", poor:"가난한",
+  smart:"똑똑한", clean:"깨끗한", slow:"느린", deep:"깊은", light:"가벼운", dark:"어두운",
+  nice:"멋진", large:"큰", late:"늦은", wide:"넓은", safe:"안전한", cute:"귀여운",
+  simple:"간단한", close:"가까운", fine:"좋은", brave:"용감한",
+  big:"큰", hot:"뜨거운", thin:"얇은", fat:"뚱뚱한", sad:"슬픈", wet:"젖은",
+  red:"빨간", slim:"날씬한", flat:"평평한",
+  happy:"행복한", easy:"쉬운", pretty:"예쁜", busy:"바쁜", early:"이른", funny:"웃긴",
+  heavy:"무거운", lucky:"운 좋은", dirty:"더러운", angry:"화난", lovely:"사랑스러운",
+  friendly:"친절한", hungry:"배고픈", noisy:"시끄러운", healthy:"건강한",
+  beautiful:"아름다운", interesting:"재미있는", difficult:"어려운", important:"중요한",
+  expensive:"비싼", delicious:"맛있는", famous:"유명한", popular:"인기 있는",
+  careful:"조심스러운", dangerous:"위험한", exciting:"신나는", wonderful:"멋진",
+  useful:"유용한", helpful:"도움이 되는", comfortable:"편안한", boring:"지루한",
+  good:"좋은", bad:"나쁜", many:"많은(수)", much:"많은(양)", little:"적은", far:"먼",
+};
+
+function syllables(w){
+  // 끝의 묵음 e 제거 (nice→nic), lovely·lonely처럼 -ely로 끝나는 경우의 e도 묵음
+  const m = w.replace(/e(?=ly$)/,"").replace(/e$/,"").match(/[aeiouy]+/g);
+  return Math.max(1, m ? m.length : 1);
+}
+function isCVC(w){
+  if(w.length < 3) return false;
+  const [a,b,c] = [w[w.length-3], w[w.length-2], w[w.length-1]];
+  return !VOWELS.includes(a) && VOWELS.includes(b) && !VOWELS.includes(c) && !"wxy".includes(c);
+}
+/* 단어 → {규칙, 비교급} 자동 분석 */
+function analyze(word){
+  const w = String(word||"").toLowerCase().replace(/[^a-z]/g,"");
+  if(!w) return null;
+  if(IRREG[w] && w!=="old") return {w, rule:"irr", comp:IRREG[w]};
+  const syl = syllables(w);
+  if(/[^aeiou]y$/.test(w) && syl<=2)              return {w, rule:"y",     comp:w.slice(0,-1)+"ier"};
+  if(syl>=3)                                       return {w, rule:"long",  comp:"more "+w};
+  if(syl===2 && !/(er|le|ow|y)$/.test(w))          return {w, rule:"long",  comp:"more "+w};
+  if(/e$/.test(w))                                 return {w, rule:"e",     comp:w+"r"};
+  if(syl===1 && isCVC(w))                          return {w, rule:"cvc",   comp:w+w.slice(-1)+"er"};
+  return {w, rule:"basic", comp:w+"er"};
+}
+const RULE_TALK = {
+  basic:a=>`${a.w}는 짧은 1음절 단어라서 뒤에 **-er**만 붙이면 끝이야!\n→ ${a.w} + er = ${a.comp} ✨`,
+  e:    a=>`${a.w}는 이미 **e로 끝나지?** 그래서 -er이 아니라 **-r만** 붙여!\n→ ${a.w} + r = ${a.comp}\n(${a.w}er 이라고 쓰면 e가 두 번 돼서 ❌)`,
+  cvc:  a=>`${a.w}의 끝 세 글자를 봐! **자음 + 단모음 + 단자음**이야.\n이럴 땐 마지막 자음을 **한 번 더** 쓰고 -er!\n→ ${a.comp} ✌️`,
+  y:    a=>`${a.w}는 **「자음 + y」**로 끝나! y를 **i**로 바꾸고 -er을 붙여.\n→ ${a.comp} 😊`,
+  long: a=>`${a.w}는 ${syllables(a.w)}음절이나 되는 **긴 단어**라서 -er을 붙이면 발음이 꼬여!\n그래서 앞에 **more**를 붙여 → ${a.comp} 💅`,
+  irr:  a=>`${a.w}는 규칙을 안 따르는 **불규칙 단어**야! 통째로 외워야 해 😈\n→ ${a.comp}`,
+};
+const RULE_NAME = {basic:"① 짧은 단어 -er", e:"② e로 끝나면 -r", cvc:"③ 단모음+단자음 겹치기",
+  y:"④ 자음+y → i+er", long:"⑤ 긴 단어 more", irr:"⑥ 불규칙"};
+
+function explainWord(word, why){
+  const a = analyze(word);
+  if(!a) return null;
+  const mean = MEAN[a.w] ? `(${MEAN[a.w]}) ` : "";
+  const head = why ? `좋은 질문이야! 👏\n\n**${a.w}** ${mean}는 ${RULE_NAME[a.rule]} 규칙이야.\n\n`
+                   : `**${a.w}** ${mean}의 비교급은 **${a.comp}**!\n\n`;
+  return head + RULE_TALK[a.rule](a);
+}
+
+/* 개념 질문 (단어가 아니라 규칙 자체를 물을 때) */
+const CONCEPTS = [
+  {re:/단모음|단자음|자음.*(겹|두 ?번|반복)|(겹|두 ?번|반복).*자음/,
+   a:"단모음·단자음! 많이 헷갈리는 부분이야 👏\n\n✔ **단모음** = 모음(a,e,i,o,u)이 **하나**만 있는 것 → big의 i, hot의 o\n✔ **단자음** = 끝에 자음이 **하나**만 있는 것 → big의 g, hot의 t\n\n이 둘로 끝나면 → 마지막 자음을 한 번 더 쓰고 -er!\n→ big → bigger, hot → hotter, thin → thinner 🔥\n\n반대로 fast는? 끝이 s+t로 자음이 **두 개**라서 그냥 faster야!"},
+  {re:/\by\b|y.*(규칙|바꾸|변|왜|i로)|왜.*i로/i,
+   a:"「**자음 + y**」로 끝나면 y를 **i**로 바꾸고 -er! ✨\n→ happy → happier, easy → easier, pretty → prettier\n\n단, 「모음 + y」면 그냥 -er이야 (gray → grayer).\ny 앞 글자가 자음인지 모음인지만 보면 돼! 😉"},
+  {re:/more.*(언제|왜|어떻게|써|붙)|(언제|왜).*more|긴 ?단어|음절/i,
+   a:"**2음절 이상 긴 단어**는 -er 대신 앞에 **more**! 💅\n→ beautiful → more beautiful, interesting → more interesting, expensive → more expensive\n\n짧은 단어에 more를 쓰면 안 돼!\nmore big ❌ → bigger ⭕\n\n헷갈리면 소리 내어 읽어봐. beautifuler... 발음이 안 되지? 😆"},
+  {re:/불규칙|better|worse|규칙.*안|외워/i,
+   a:"규칙을 안 따르는 반항아 단어들! 😈 통째로 외우자:\n\n✔ good / well (좋은) → **better**\n✔ bad / ill (나쁜) → **worse**\n✔ many / much (많은) → **more**\n✔ little (적은) → **less**\n✔ far (먼) → **farther / further**"},
+  {re:/최상급|est|가장|제일/i,
+   a:"-est는 **최상급**! '가장 ~한'이라는 뜻이야 🏆\n\n✔ 비교급(-er) = **둘**을 비교 → Tom is **taller** than Jane.\n✔ 최상급(-est) = **셋 이상** 중 최고 → Tom is **the tallest** in my class.\n\n오늘 우리가 연습하는 건 비교급(-er / more)이야! 💪"},
+  {re:/than|보다/i,
+   a:"비교하는 대상 앞에는 **than**(~보다)을 써! 🤜🤛\n\n→ Tom is taller **than** Jane. (톰은 제인**보다** 키가 커)\n→ Math is more interesting **than** science.\n\n순서는 [비교급 + than + 비교 대상] 이야!"},
+  {re:/비교급.*(뭐|뭣|무엇|이란|란)|비교급.*정리|규칙.*(정리|요약|알려|전부|다)/,
+   a:"비교급 규칙 6가지 한눈 정리! 📚\n\n① 짧은 단어 → -er  (old → older)\n② e로 끝남 → -r만  (nice → nicer)\n③ 단모음+단자음 → 자음 겹치고 -er  (big → bigger)\n④ 자음+y → y를 i로 + er  (happy → happier)\n⑤ 긴 단어 → more + 원급  (beautiful → more beautiful)\n⑥ 불규칙 → 통째로 암기  (good → better)"},
+  {re:/안녕|하이|hello|hi\b|반가/i,
+   a:"안녕! 난 비교급 전문 AI, **비교봇**이야 🤖💚\n문제를 풀다가 궁금한 게 생기면 언제든 물어봐!\n단어를 그냥 적어도 돼 — 'hungry' 라고 치면 비교급을 알려줄게!"},
+  {re:/고마|감사|ㄳ|땡큐|thank/i,
+   a:"천만에! 😊 더 궁금한 거 있으면 또 물어봐. 나는 계속 여기 있을게 🤖"},
+  {re:/이름|너 ?누구|넌 ?누구|뭐야 ?너/,
+   a:"나는 **비교봇**! 비교급만 파고든 AI야 🤖\n영어 형용사를 주면 어떤 규칙인지 분석해서 알려줄 수 있어!"},
+  {re:/어렵|모르겠|힘들|헷갈/,
+   a:"괜찮아, 헷갈리는 게 당연해! 😌\n문제 아래 **💡 힌트** 버튼을 누르면 내가 살짝 알려줄게.\n아니면 'big은 왜 g를 두 번 써?' 처럼 구체적으로 물어봐도 좋아!"},
+];
+
+const STOP = new Set(["more","most","than","the","is","are","am","a","an","it","this","that",
+  "what","why","how","do","does","you","i","me","my","er","est","and","or","but","to","of","in","on"]);
+
+/* 학생 질문 → 비교봇 답변 */
+function botAnswer(raw){
+  const txt = raw.trim();
+  const low = txt.toLowerCase();
+  const why = /왜|어째서|이유|어떻게/.test(txt);
+  const deictic = /얘|이거|이건|이것|이 ?단어|지금|방금|문제/.test(txt);
+
+  // 1) 문장 속 영어 단어 찾기 (기능어 제외)
+  const found = (low.match(/[a-z]{2,}/g) || []).filter(w=>!STOP.has(w));
+  let target = found[0] || null;
+
+  // 2) "얘는 왜 more가 붙어?" → 지금 풀고 있는 문제의 단어
+  if(!target && (deictic || why) && S.curWord) target = S.curWord;
+
+  // 3) 단어가 잡혔으면 그 단어를 설명
+  if(target){
+    const ex = explainWord(target, why || deictic);
+    if(ex) return ex;
+  }
+  // 4) 개념 질문
+  const hit = CONCEPTS.find(c=>c.re.test(txt));
+  if(hit) return hit.a;
+  // 5) 그래도 모르면
+  return "음~ 그건 내가 아직 잘 모르겠어 🤔 (선생님 화면에 질문을 전달했어!)\n\n이런 건 바로 답해줄 수 있어:\n• 영어 단어를 그냥 적기 → 'hungry' 'expensive'\n• '단모음이 뭐야?'\n• 'more는 언제 써?'\n• 'big은 왜 g를 두 번 써?'\n• '불규칙 알려줘'";
+}
+
+/* =========================================================
+   공통 유틸
+========================================================= */
+const $ = (id)=>document.getElementById(id);
+const views = ["viewHome","viewStudent","viewTeacher"];
+function show(view){ views.forEach(v=>$(v).classList.toggle("hidden", v!==view)); window.scrollTo(0,0); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),2600); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const todayKey = ()=>{ const d=new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`; };
+const skOf = (cls)=>`${cls}-${todayKey()}`;   // 반 + 오늘 날짜 = 오늘 그 반의 기록
+
+/* =========================================================
+   🏠 홈 화면
+========================================================= */
+let selClass = null;
+(function buildHome(){
+  const grid = $("classGrid");
+  for(let i=1;i<=NUM_CLASSES;i++){
+    const b=document.createElement("button");
+    b.className="class-btn"; b.textContent=i+"반";
+    b.onclick=()=>{ selClass=String(i);
+      [...grid.children].forEach(c=>c.classList.remove("sel")); b.classList.add("sel"); checkJoinable(); };
+    grid.appendChild(b);
+  }
+  $("nameInput").addEventListener("input", checkJoinable);
+  $("nameInput").addEventListener("keydown", e=>{ if(e.key==="Enter" && !$("joinBtn").disabled) $("joinBtn").click(); });
+})();
+function checkJoinable(){ $("joinBtn").disabled = !(selClass && $("nameInput").value.trim().length>=1); }
+
+/* =========================================================
+   🧑‍🎓 학생 모드
+========================================================= */
+const S = {
+  cls:null, name:null, sk:null, ref:null, answers:[],
+  q:0, correct:0, wrong:0, hints:0, usedHint:false,
+  answering:false, finished:false, hbTimer:null,
+  curIdx:null, curWord:null, curEl:null,
+  saveTimer:null, savePending:false, online:true,
+};
+
+// 학생은 기다리지 않고 바로 시작 (선생님이 시작 버튼을 누를 필요 없음)
+$("joinBtn").onclick = ()=>{
+  S.cls = selClass; S.name = $("nameInput").value.trim();
+  $("joinBtn").disabled = true;
+  enterGame(skOf(S.cls));
+};
+
+/* 진행 상황 저장
+   - 같은 문서에 초당 1회 이상 쓰면 Firestore가 경합을 일으키므로 1.2초 간격으로 묶어서 보냄
+   - 실패해도 게임은 절대 멈추지 않고, 다음 저장 때 전체 상태가 다시 올라감 */
+function setConn(ok){
+  if(S.online === ok) return;
+  S.online = ok;
+  const el = $("connLine"); if(!el) return;
+  el.textContent = ok ? "● 온라인 — 비교급 전문 AI" : "● 저장 대기 중… (게임은 계속할 수 있어요)";
+  el.style.color = ok ? "var(--mint-dark)" : "#C2543C";
+}
+function doSave(){
+  if(!S.ref) return;
+  updateDoc(S.ref, {
+    q:S.q, correct:S.correct, wrong:S.wrong, hints:S.hints,
+    done:S.finished, answers:S.answers, lastSeen:Date.now(),
+  }).then(()=>setConn(true))
+    .catch(e=>{ console.error("저장 실패:", e); setConn(false); });
+}
+function saveProgress(){
+  if(!S.ref) return;
+  if(S.saveTimer){ S.savePending = true; return; }
+  doSave();
+  S.saveTimer = setTimeout(()=>{
+    S.saveTimer = null;
+    if(S.savePending){ S.savePending = false; saveProgress(); }
+  }, 1200);
+}
+
+async function enterGame(sk){
+  S.sk = sk;
+  // 새로고침 대비: 같은 날 같은 반이면 이어하기
+  let saved=null;
+  try{ saved = JSON.parse(localStorage.getItem("bibot_stu")||"null"); }catch(_){}
+  if(saved && saved.sk===sk && saved.id){
+    try{
+      const d = await getDoc(doc(db,"students",saved.id));
+      if(d.exists()){
+        const v=d.data(); S.ref=doc(db,"students",saved.id);
+        S.q=v.q||0; S.correct=v.correct||0; S.wrong=v.wrong||0; S.hints=v.hints||0;
+        S.answers = Array.isArray(v.answers)? v.answers : [];
+        startChat(true); return;
+      }
+    }catch(_){}
+  }
+  // 화면은 즉시 시작하고, 기록 등록은 뒤에서 처리
+  startChat(false);
+  addDoc(collection(db,"students"),{
+    cls:S.cls, sk, name:S.name, joined:Date.now(), lastSeen:Date.now(),
+    q:0, correct:0, wrong:0, hints:0, done:false, answers:[],
+  }).then(r=>{
+    S.ref = r;
+    try{ localStorage.setItem("bibot_stu", JSON.stringify({id:r.id, sk})); }catch(_){}
+    saveProgress();
+  }).catch(e=>{
+    console.error(e);
+    toast("⚠️ 선생님 화면에 기록이 안 될 수 있어요 (게임은 계속 가능!)");
+  });
+}
+
+function startChat(resumed){
+  show("viewStudent");
+  updatePills();
+  S.hbTimer = setInterval(()=>{ if(S.ref) updateDoc(S.ref,{lastSeen:Date.now()}).catch(()=>{}); }, 25_000);
+  if(resumed && S.q>0){
+    botSay(`다시 왔구나, ${S.name}! 😊 이어서 가보자!`);
+    setTimeout(()=> S.q>=NQ ? finishGame(false) : askQuestion(S.q), 900);
+  }else{
+    botSay(`안녕, ${S.name}! 👋 나는 비교급 전문 AI, **비교봇**이야 🤖\n지금부터 비교급 챌린지 ${NQ}문제를 낼게. 쉬운 것부터 차근차근 가보자!`);
+    setTimeout(()=>botSay("🔸 보기를 **눌러도** 되고, 아래 칸에 답을 **직접 써도** 돼!\n🔸 막히면 **💡 힌트** 버튼을 누르고,\n🔸 궁금한 건 아무거나 물어봐 — \"단모음이 뭐야?\", \"얘는 왜 more가 붙어?\" 처럼! 💬"),1200);
+    setTimeout(()=>askQuestion(0),2300);
+  }
+}
+
+function updatePills(){
+  $("scorePill").textContent = `⭐ ${S.correct}`;
+  $("progressPill").textContent = `${Math.min(S.q,NQ)} / ${NQ}`;
+}
+function scrollChat(){ const c=$("chatScroll"); requestAnimationFrame(()=>{ c.scrollTop=c.scrollHeight; }); }
+function addMsg(side, html){
+  const m=document.createElement("div"); m.className="msg "+side;
+  m.innerHTML = `<span class="face">${side==="bot"?"🤖":"🧑‍🎓"}</span><div class="bubble">${html}</div>`;
+  $("chatScroll").appendChild(m); scrollChat(); return m;
+}
+// **굵게** 표시를 지원하는 말풍선
+function fmt(text){ return esc(text).replace(/\*\*(.+?)\*\*/g, '<b style="color:var(--mint-dark)">$1</b>'); }
+function botSay(text){ return addMsg("bot", fmt(text)); }
+function botTyping(fn, delay=700){
+  const m=addMsg("bot",'<span class="typing"><i></i><i></i><i></i></span>');
+  setTimeout(()=>{ m.remove(); fn(); }, delay);
+}
+
+function askQuestion(i){
+  S.q = i; S.usedHint=false; S.answering=true; S.curIdx=i; S.curWord=QUESTIONS[i].w; updatePills();
+  const Q = QUESTIONS[i];
+  const optHtml = Q.opts.map((o,k)=>`<button class="opt-btn" data-k="${k}">${esc(o)}</button>`).join("");
+  const m = addMsg("bot",
+    `<b>Q${i+1}.</b> ${esc(Q.q)}\n<span class="big-word">${esc(Q.w)}</span> ➡ ❓`+
+    `<div class="opts">${optHtml}</div>`+
+    `<div class="hint-row"><button class="hint-btn">💡 비교봇 힌트 받기</button></div>`);
+  S.curEl = m;
+  m.querySelectorAll(".opt-btn").forEach(b=> b.onclick=()=>answer(i, +b.dataset.k));
+  m.querySelector(".hint-btn").onclick = (e)=>{
+    if(S.usedHint) return;
+    S.usedHint = true; S.hints++;
+    e.target.textContent = "💡 힌트 받음!"; e.target.style.opacity=".6";
+    botTyping(()=>botSay("💡 "+Q.hint), 600);
+    saveProgress();
+  };
+}
+
+const PRAISE = ["정답!! 🎉 완전 잘하는데?","딩동댕~ ⭕ 바로 그거야!","오~ 천재인데? 🌟","정답이야! 척척박사 👏","좋아 좋아! 그 느낌 그대로! 🔥"];
+function answer(i, pick, typed){
+  if(!S.answering) return;
+  S.answering = false;
+  const Q = QUESTIONS[i];
+  const ok = pick===Q.ans;
+  if(S.curEl){
+    S.curEl.querySelectorAll(".opt-btn").forEach((b,k)=>{
+      b.disabled = true;
+      if(k===Q.ans) b.classList.add("ok");
+      else if(k===pick) b.classList.add("no");
+    });
+    const hb = S.curEl.querySelector(".hint-btn"); if(hb) hb.disabled = true;
+  }
+  if(!typed) addMsg("me", esc(Q.opts[pick]));   // 직접 친 경우엔 이미 말풍선이 있음
+  if(ok){ S.correct++; } else { S.wrong++; }
+  updatePills();
+  S.answers.push({q:i, pick, ok, tag: ok?null:(Q.tags[pick]||"spell"), hint:S.usedHint, t:Date.now()});
+  S.q = i+1;
+  saveProgress();
+
+  botTyping(()=>{
+    if(ok){
+      botSay(PRAISE[Math.floor(Math.random()*PRAISE.length)] + (S.usedHint?" (힌트 찬스 성공 💡)":""));
+    }else{
+      botSay(`아깝다! 😢 정답은 "${Q.opts[Q.ans]}"!\n${Q.hint}`);
+    }
+    const next = i+1;
+    if(next < NQ) setTimeout(()=>askQuestion(next), 1300);
+    else setTimeout(()=>finishGame(false), 1300);
+  }, 650);
+}
+
+function finishGame(byTeacher){
+  if(S.finished) return;
+  S.finished = true; S.answering=false;
+  saveProgress();
+  const total = S.correct + S.wrong;
+  const msg = byTeacher ? "⏰ 선생님이 게임을 종료했어! 여기까지 정말 잘했어!" : `🏁 ${NQ}문제 모두 끝!! 정말 수고했어!`;
+  botTyping(()=>{
+    botSay(msg);
+    const card=document.createElement("div");
+    card.className="final-card";
+    card.innerHTML = `<div class="trophy">${S.correct>=total*0.8?"🏆":S.correct>=total*0.5?"🎖":"🌱"}</div>
+      <div class="sc">${S.correct} / ${total||NQ}</div>
+      <div style="font-size:14px; color:var(--sub); margin-top:4px;">힌트 ${S.hints}번 사용 · 이제 선생님 화면을 봐요! 📺<br>궁금한 건 계속 채팅으로 물어봐도 돼 🤖</div>`;
+    $("chatScroll").appendChild(card); scrollChat();
+  }, 800);
+}
+
+/* 자유 입력 — 답을 직접 쳐도 되고, 질문을 해도 됨 */
+$("freeSend").onclick = sendFree;
+$("freeInput").addEventListener("keydown", e=>{ if(e.key==="Enter") sendFree(); });
+
+const norm = s=>String(s||"").toLowerCase().replace(/[^a-z ]/g,"").replace(/\s+/g," ").trim();
+
+function sendFree(){
+  const txt = $("freeInput").value.trim();
+  if(!txt) return;
+  $("freeInput").value = "";
+  addMsg("me", esc(txt));
+
+  // ① 지금 문제의 보기 중 하나를 직접 타이핑했다면 → 답안으로 처리
+  if(S.answering && S.curIdx!=null){
+    const Q = QUESTIONS[S.curIdx];
+    const k = Q.opts.findIndex(o=>norm(o)===norm(txt));
+    if(k >= 0){
+      answer(S.curIdx, k, true);
+      return;
+    }
+    // 정답을 살짝 다르게 쓴 경우(철자 실수) 안내
+    const ansN = norm(Q.opts[Q.ans]);
+    const t = norm(txt);
+    if(t.length>2 && (ansN.startsWith(t) || t.startsWith(ansN.slice(0,3)))){
+      botTyping(()=>botSay(`오! 거의 다 왔어 🔥 철자를 한 번만 더 확인해 볼래?\n위의 보기 중에서 골라도 좋아!`), 700);
+      logChat(txt); return;
+    }
+  }
+  // ② 그 외에는 질문으로 처리
+  botTyping(()=>botSay(botAnswer(txt)), 750);
+  logChat(txt);
+}
+
+function logChat(txt){
+  if(!S.sk) return;
+  addDoc(collection(db,"chats"),{
+    cls:S.cls, sk:S.sk, name:S.name, text:txt.slice(0,120), ts:Date.now()
+  }).catch(e=>console.error("질문 저장 실패:", e));
+}
+
+/* =========================================================
+   👩‍🏫 교사 모드
+========================================================= */
+const T = {
+  cls:null, sk:null,
+  students:[], chats:[],
+  unsubStu:null, unsubChat:null,
+  showNames:true, showSummary:false, renderTimer:null,
+};
+
+$("teacherLink").onclick = ()=>{ $("pinModal").classList.remove("hidden"); $("pinInput").value=""; setTimeout(()=>$("pinInput").focus(),50); };
+$("pinCancel").onclick = ()=> $("pinModal").classList.add("hidden");
+$("pinInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("pinOk").click(); });
+$("pinOk").onclick = ()=>{
+  if($("pinInput").value===TEACHER_PIN){
+    $("pinModal").classList.add("hidden");
+    openTeacher();
+  }else toast("비밀번호가 달라요! 🙅");
+};
+$("homeBtn").onclick = ()=>{ location.reload(); };
+
+function openTeacher(){
+  show("viewTeacher");
+  const sel = $("teacherClassSel");
+  if(!sel.options.length){
+    for(let i=1;i<=NUM_CLASSES;i++){ const o=document.createElement("option"); o.value=String(i); o.textContent=i+"반"; sel.appendChild(o); }
+    sel.onchange = ()=>watchClass(sel.value);
+  }
+  const savedCls = localStorage.getItem("bibot_tcls") || "1";
+  sel.value = savedCls;
+  watchClass(savedCls);
+}
+
+function watchClass(cls){
+  T.cls = cls; localStorage.setItem("bibot_tcls", cls);
+  T.students=[]; T.chats=[];
+  T.sk = skOf(cls);          // 선택한 반 + 오늘 날짜만 집계 (다른 반·지난 수업은 제외)
+  watchSessionData();
+}
+
+function watchSessionData(){
+  if(T.unsubStu){ T.unsubStu(); T.unsubStu=null; }
+  if(T.unsubChat){ T.unsubChat(); T.unsubChat=null; }
+  T.students=[]; T.chats=[];
+  if(!T.sk){ renderAll(); return; }
+  T.unsubStu = onSnapshot(query(collection(db,"students"), where("sk","==",T.sk)), qs=>{
+    T.students = qs.docs.map(d=>({id:d.id, ...d.data()}));
+    scheduleRender();
+  }, err=>{
+    console.error(err);
+    $("stuGrid").innerHTML = `<div class="empty">⚠️ Firestore에 연결하지 못했어요.<br>
+      Firebase 콘솔 → Firestore Database → <b>규칙</b>에 보안규칙을 붙여넣고 <b>게시</b>했는지 확인해 주세요.<br>
+      <span style="font-size:12px">(오류: ${esc(err.code||err.message||"unknown")})</span></div>`;
+  });
+  T.unsubChat = onSnapshot(query(collection(db,"chats"), where("sk","==",T.sk)), qs=>{
+    T.chats = qs.docs.map(d=>d.data()).sort((a,b)=>b.ts-a.ts);
+    scheduleRender();
+  }, err=>console.error(err));
+}
+function scheduleRender(){ clearTimeout(T.renderTimer); T.renderTimer=setTimeout(renderAll,120); }
+setInterval(()=>{ if(!$("viewTeacher").classList.contains("hidden")) renderAll(); }, 15_000); // 초록불 갱신
+
+/* 결과 요약 보기 / 숨기기 */
+$("endBtn").onclick = ()=>{
+  T.showSummary = !T.showSummary;
+  $("endBtn").textContent = T.showSummary ? "📊 결과 숨기기" : "🏁 게임 종료 · 결과 보기";
+  renderAll();
+  if(T.showSummary) toast("🏁 결과 요약을 펼쳤어요");
+};
+$("nameTgl").onclick = ()=>{
+  T.showNames = !T.showNames;
+  $("nameTgl").classList.toggle("on", T.showNames);
+  $("nameTglLabel").textContent = T.showNames ? "이름 보이기" : "이름 숨김 (공유 모드)";
+  renderAll();
+};
+function maskName(n, idx){ return T.showNames ? esc(n) : `🐥 학생${String(idx+1).padStart(2,"0")}`; }
+
+function renderSessionState(){
+  const el = $("sessionState");
+  const n = T.students.length;
+  if(n){ el.textContent = `🟢 ${T.cls}반 실시간 수집 중 · ${n}명 참여`; el.className="session-state on"; }
+  else { el.textContent = `⏳ ${T.cls}반 · 학생 입장을 기다리는 중`; el.className="session-state off"; }
+}
+
+/* ---------- 통계 계산 ---------- */
+function computeStats(){
+  const now = Date.now();
+  const stus = [...T.students].sort((a,b)=>(a.joined||0)-(b.joined||0));
+  const online = stus.filter(s=> now-(s.lastSeen||0) < ONLINE_WINDOW);
+  const done = stus.filter(s=>s.done);
+  const active = stus.filter(s=>!s.done && now-(s.lastSeen||0) < ONLINE_WINDOW);
+  let totA=0, totOk=0, totHintSolved=0, hintCnt=0;
+  const perQ = QUESTIONS.map(()=>({ok:0, no:0, picks:[0,0,0,0], wrongWho:[]}));
+  const perCat = {}; Object.keys(CATS).forEach(c=>perCat[c]={ok:0,tot:0});
+  const errCnt = {};
+  stus.forEach((s,si)=>{
+    (s.answers||[]).forEach(a=>{
+      if(a.q==null || !perQ[a.q]) return;
+      totA++;
+      perQ[a.q].picks[a.pick] = (perQ[a.q].picks[a.pick]||0)+1;
+      const cat = QUESTIONS[a.q].cat;
+      perCat[cat].tot++;
+      if(a.ok){ totOk++; perQ[a.q].ok++; perCat[cat].ok++; if(a.hint) totHintSolved++; }
+      else{
+        perQ[a.q].no++;
+        perQ[a.q].wrongWho.push({name:s.name, idx:si, pick:a.pick});
+        if(a.tag) errCnt[a.tag]=(errCnt[a.tag]||0)+1;
+      }
+      if(a.hint) hintCnt++;
+    });
+  });
+  return {stus, online, done, active, totA, totOk, perQ, perCat, errCnt, hintCnt, totHintSolved};
+}
+
+/* ---------- 렌더링 ---------- */
+function renderAll(){
+  renderSessionState();
+  const st = computeStats();
+  $("statOnline").innerHTML = st.online.length+"<small> 명</small>";
+  $("statActive").innerHTML = st.active.length+"<small> 명</small>";
+  $("statDone").innerHTML = st.done.length+"<small> 명</small>";
+  $("statAcc").innerHTML = (st.totA? Math.round(st.totOk/st.totA*100):"-")+"<small> %</small>";
+  $("statHint").innerHTML = st.hintCnt+"<small> 회</small>";
+  renderStudents(st);
+  renderRank(st);
+  renderAI(st);
+  renderChats();
+  renderSummary(st);
+}
+
+function renderStudents(st){
+  const g = $("stuGrid");
+  if(!st.stus.length){ g.innerHTML = `<div class="empty">아직 입장한 학생이 없어요 — 학생이 들어오면 초록불이 켜집니다</div>`; return; }
+  const now = Date.now();
+  g.innerHTML = st.stus.map((s,i)=>{
+    const on = now-(s.lastSeen||0) < ONLINE_WINDOW;
+    const prog = Math.min(s.q||0, NQ);
+    const answered = (s.correct||0)+(s.wrong||0);
+    return `<div class="stu-card ${s.done?"done":""}">
+      <span class="flag">${s.done?"🏁":on?"✍️":"💤"}</span>
+      <div class="nm"><span class="dot ${on?"on":""}"></span>${maskName(s.name,i)}</div>
+      <div class="meta">${s.done?`완료! ⭐${s.correct||0}/${answered}`:`Q${prog+ (prog<NQ?1:0)} 풀이 중 · ⭕${s.correct||0} ❌${s.wrong||0}`}<br>💡힌트 ${s.hints||0}회</div>
+      <div class="mini-bar"><i style="width:${Math.round(prog/NQ*100)}%"></i></div>
+    </div>`;
+  }).join("");
+}
+
+function renderRank(st){
+  const items = st.perQ.map((p,i)=>({i, ...p, att:p.ok+p.no, rate:(p.ok+p.no)? p.no/(p.ok+p.no):0}))
+    .filter(x=>x.att>0).sort((a,b)=> b.rate-a.rate || b.no-a.no);
+  if(!items.length){ $("rankList").innerHTML = `<div class="empty">답안이 모이면 순위가 나타나요</div>`; return; }
+  $("rankList").innerHTML = items.map((x,r)=>`
+    <div class="rank-item ${r<3&&x.rate>0?"hot":""}">
+      <span class="rank-no">${r+1}</span>
+      <span class="rank-word">${esc(QUESTIONS[x.i].w)} <span style="color:var(--sub);font-size:12px;">Q${x.i+1}</span></span>
+      <div class="rank-bar"><i style="width:${Math.round(x.rate*100)}%"></i></div>
+      <span class="rank-pct">${Math.round(x.rate*100)}% (${x.no}명)</span>
+    </div>`).join("");
+}
+
+function renderAI(st){
+  const msgs=[];
+  if(st.totA===0){
+    msgs.push("학생들의 답이 모이면 비교봇이 오류 유형과 개념 이해도를 분석해 드려요 🔍");
+  }else{
+    const acc = Math.round(st.totOk/st.totA*100);
+    msgs.push(`지금까지 <b>${st.stus.length}명</b>이 <b>${st.totA}개</b> 답안을 제출했고, 전체 정답률은 <b>${acc}%</b>예요.`);
+    // 규칙별 진단
+    const cats = Object.entries(st.perCat).filter(([,v])=>v.tot>0)
+      .map(([k,v])=>({k, rate:v.ok/v.tot, tot:v.tot})).sort((a,b)=>a.rate-b.rate);
+    if(cats.length){
+      const weak = cats[0], strong = cats[cats.length-1];
+      if(strong.rate>=0.75) msgs.push(`👍 <b>${CATS[strong.k].label}</b> (${CATS[strong.k].ex})는 ${Math.round(strong.rate*100)}%로 잘 이해하고 있어요.`);
+      if(weak.rate<0.7 && weak.k!==strong.k) msgs.push(`⚠️ <b>${CATS[weak.k].label}</b> (${CATS[weak.k].ex})에서 정답률 ${Math.round(weak.rate*100)}% — 이 규칙을 짚어 주시면 좋겠어요.`);
+      const learned = cats.filter(c=>c.rate>=0.7).length;
+      msgs.push(`📏 비교급 규칙 6단계 중 <b>${learned}개 규칙</b>은 안정권, <b>${cats.length-learned}개 규칙</b>은 연습이 더 필요해 보여요.`);
+    }
+    // 오류 패턴
+    const errs = Object.entries(st.errCnt).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    if(errs.length){
+      msgs.push("🔍 자주 보이는 오류: " + errs.map(([k,n])=>`<b>${ERRS[k]}</b> ${n}회`).join(" · "));
+    }
+    if(st.hintCnt>0){
+      msgs.push(`💡 힌트는 총 ${st.hintCnt}회 사용됐고, 힌트를 받은 뒤 맞힌 경우가 ${st.totHintSolved}번이에요. 힌트가 많이 쓰인 문제는 스스로 풀기 어려웠다는 신호!`);
+    }
+  }
+  $("aiMsgs").innerHTML = msgs.map(m=>`<div class="ai-msg">${m}</div>`).join("");
+  // 규칙별 이해도 바
+  $("catBars").innerHTML = Object.entries(CATS).map(([k,c])=>{
+    const v = st.perCat[k]||{ok:0,tot:0};
+    const pct = v.tot? Math.round(v.ok/v.tot*100) : null;
+    return `<div class="cat-row">
+      <span class="cat-name">${esc(c.label)}</span>
+      <div class="cat-bar"><i style="width:${pct??0}%; background:${c.color};"></i></div>
+      <span class="cat-pct" style="color:${c.color}">${pct==null?"—":pct+"%"}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderChats(){
+  const f = $("chatFeed");
+  if(!T.chats.length){ f.innerHTML=`<div class="empty">아직 질문이 없어요</div>`; return; }
+  f.innerHTML = T.chats.slice(0,40).map((c)=>{
+    const idx = T.students.findIndex(s=>s.name===c.name);
+    return `<div class="q-item"><span class="qn">${maskName(c.name, Math.max(idx,0))}</span> · ${new Date(c.ts).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})}<br>${esc(c.text)}</div>`;
+  }).join("");
+}
+
+function renderSummary(st){
+  const panel = $("summaryPanel");
+  if(!T.showSummary || st.totA===0){ panel.classList.add("hidden"); return; }
+  panel.classList.remove("hidden");
+  const items = st.perQ.map((p,i)=>({i,...p,att:p.ok+p.no})).filter(x=>x.att>0);
+  if(!items.length) return;
+  const best = [...items].sort((a,b)=> (b.ok/b.att)-(a.ok/a.att) || b.ok-a.ok)[0];
+  const worst = [...items].sort((a,b)=> (b.no/b.att)-(a.no/a.att) || b.no-a.no)[0];
+  $("sumBest").textContent = QUESTIONS[best.i].w + " → " + QUESTIONS[best.i].opts[QUESTIONS[best.i].ans];
+  $("sumBestSub").textContent = `${best.att}명 중 ${best.ok}명 정답 (${Math.round(best.ok/best.att*100)}%)`;
+  $("sumWorst").textContent = QUESTIONS[worst.i].w + " → " + QUESTIONS[worst.i].opts[QUESTIONS[worst.i].ans];
+  $("sumWorstSub").textContent = `${worst.att}명 중 ${worst.no}명 오답 (${Math.round(worst.no/worst.att*100)}%)`;
+  // 문제별 오답 상세 (이름은 토글에 따라)
+  const wrongQs = items.filter(x=>x.no>0).sort((a,b)=>b.no-a.no);
+  $("wrongDetail").innerHTML = wrongQs.map(x=>{
+    const Q=QUESTIONS[x.i];
+    const byPick={};
+    x.wrongWho.forEach(w=>{ (byPick[w.pick]=byPick[w.pick]||[]).push(w); });
+    const chips = Object.entries(byPick).map(([pk,arr])=>
+      `<span class="wd-ans">"${esc(Q.opts[pk])}" × ${arr.length}명${T.showNames?` <span class="names">(${arr.map(w=>esc(w.name)).join(", ")})</span>`:""}</span>`).join("");
+    return `<div class="wd-q"><div class="head">Q${x.i+1}. ${esc(Q.w)} — 정답 "${esc(Q.opts[Q.ans])}" · 오답 ${x.no}명</div>${chips}</div>`;
+  }).join("") || `<div class="empty">오답이 없어요! 전원 정답 🎉</div>`;
+}
+
+/* =========================================================
+   📺 복습 모드 (큰 화면)
+========================================================= */
+const RV = {list:[], idx:0, revealed:false};
+$("reviewBtn").onclick = ()=>{
+  const st = computeStats();
+  const items = st.perQ.map((p,i)=>({i,...p,att:p.ok+p.no, rate:(p.ok+p.no)?p.no/(p.ok+p.no):0}))
+    .filter(x=>x.att>0).sort((a,b)=>b.rate-a.rate || b.no-a.no);
+  if(!items.length){ toast("아직 답안 데이터가 없어요! 학생들이 풀면 복습할 수 있어요."); return; }
+  RV.list = items; RV.idx = 0;
+  $("reviewOverlay").classList.remove("hidden");
+  if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+  renderReview();
+};
+$("rvClose").onclick = ()=>{ $("reviewOverlay").classList.add("hidden"); if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); };
+$("rvPrev").onclick = ()=>{ if(RV.idx>0){RV.idx--; renderReview();} };
+$("rvNext").onclick = ()=>{ if(RV.idx<RV.list.length-1){RV.idx++; renderReview();} };
+$("rvReveal").onclick = ()=>{ RV.revealed=true; renderReview(true); };
+document.addEventListener("keydown", e=>{
+  if($("reviewOverlay").classList.contains("hidden")) return;
+  if(e.key==="ArrowRight") $("rvNext").click();
+  if(e.key==="ArrowLeft") $("rvPrev").click();
+  if(e.key===" "||e.key==="Enter"){ e.preventDefault(); $("rvReveal").click(); }
+  if(e.key==="Escape") $("rvClose").click();
+});
+
+function renderReview(keepReveal){
+  if(!keepReveal) RV.revealed=false;
+  const x = RV.list[RV.idx]; const Q = QUESTIONS[x.i];
+  $("rvRank").textContent = `오답률 ${RV.idx+1}위 · 오답률 ${Math.round(x.rate*100)}% (${x.no}명 / ${x.att}명)`;
+  $("rvWord").textContent = Q.w;
+  $("rvQ").textContent = Q.q + "  — 우리 반은 어떻게 답했을까?";
+  const maxPick = Math.max(1, ...x.picks);
+  $("rvOpts").innerHTML = Q.opts.map((o,k)=>{
+    const n = x.picks[k]||0;
+    const isAns = k===Q.ans && RV.revealed;
+    return `<div class="rv-opt ${isAns?"ans":""}">
+      <div class="fill" style="width:${Math.round(n/maxPick*100)}%"></div>
+      <div class="lb"><span>${isAns?"✅ ":""}${esc(o)}</span><span class="n">${n}명</span></div>
+    </div>`;
+  }).join("");
+  const h = $("rvHint");
+  if(RV.revealed){ h.classList.remove("hidden"); h.textContent = "💡 " + Q.hint; }
+  else h.classList.add("hidden");
+  $("rvPrev").disabled = RV.idx===0;
+  $("rvNext").disabled = RV.idx===RV.list.length-1;
+  $("rvReveal").textContent = RV.revealed ? "✅ 정답 확인!" : "✨ 정답 공개";
+}
+
+/* URL로 바로 교사 모드 진입: index.html?teacher */
+if(new URLSearchParams(location.search).has("teacher")){ $("teacherLink").click(); }
+</script>
+</body>
+</html>
